@@ -54,7 +54,7 @@ def get_valued_sentiment():
         print("Error in sentiment analysis. Running without sentiment adjustment.")
         return 0
 
-def buy_sell_decision(predicted_price, current_price, threshold = 5):
+def buy_sell_decision(predicted_price, current_price, threshold = 3):
     if predicted_price > current_price + threshold :
         return 'buy'
     elif predicted_price < current_price - threshold:
