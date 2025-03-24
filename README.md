@@ -62,8 +62,14 @@ Portfolio Value: $10000.00
 
 You can also use the prediction system directly without trading:
 
+### Single Day Prediction
 ```bash
 python predict_future.py --model_path models/tsla_lstm_1.pth --input_file Project_Datasets/Cleaned_and_Formatted/March20_1year.csv --days_ahead 1
+```
+
+### Multiple Days Prediction
+```bash
+python predict_future.py --model_path models/tsla_lstm_1.pth --input_file Project_Datasets/Cleaned_and_Formatted/March20_1year.csv --days_ahead 7
 ```
 
 ### Parameters
@@ -73,14 +79,35 @@ python predict_future.py --model_path models/tsla_lstm_1.pth --input_file Projec
 - `--days_ahead`: Number of days to predict (default: 1)
 - `--sequence_length`: Number of past days to consider (default: 60)
 
-### Output Example
+### Output Examples
 
+Single Day Output:
 ```
 Date: 2024-03-21
 Current Price: $248.71
 Predicted Price Before Sentiment: $244.25
 Predicted Price After Sentiment: $239.58
 ```
+
+Multiple Days Output:
+```
+Date: 2024-03-21
+Current Price: $248.71
+Predicted Price Before Sentiment: $244.25
+Predicted Price After Sentiment: $239.58
+
+Date: 2024-03-22
+Predicted Price Before Sentiment: $242.18
+Predicted Price After Sentiment: $237.51
+
+Date: 2024-03-23
+Predicted Price Before Sentiment: $241.95
+Predicted Price After Sentiment: $237.28
+
+... (continues for all 7 days)
+```
+
+Note: When predicting multiple days ahead, each prediction uses the previous day's prediction as input, which may increase uncertainty in the predictions. The sentiment analysis is recalculated for each day using the latest news data.
 
 ## Project Structure
 

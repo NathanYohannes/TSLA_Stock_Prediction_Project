@@ -78,10 +78,14 @@ def run_prediction(model_path, input_file):
     for line in lines:
         if "Current Price: $" in line:
             current_price = float(line.split("$")[1])
-        elif "Predicted Price Before Sentiment: $" in line:
+        elif "Predicted Price: $" in line:
             predicted_price = float(line.split("$")[1])
-        elif "Predicted Price After Sentiment: $" in line:
+        elif "Final Predicted Price: $" in line:
             sentiment_price = float(line.split("$")[1])
+    
+    # If no sentiment-adjusted price available, use the base prediction
+    if predicted_price and not sentiment_price:
+        sentiment_price = predicted_price
     
     return current_price, predicted_price, sentiment_price
 
@@ -100,7 +104,6 @@ def main():
     
     # Get predictions
     current_price, predicted_price, sentiment_price = run_prediction(args.model_path, args.input_file)
-    #print("\n\n\n\n", run_prediction(args.model_path, args.input_file), "\n\n\n\n")
     
     if all(price is not None for price in [current_price, predicted_price, sentiment_price]):
         # Print current portfolio status
@@ -112,7 +115,11 @@ def main():
         # Execute trade
         print("\n=== Trade Decision ===")
         print(f"Current Price: ${current_price:.2f}")
-        print(f"Predicted Price (with sentiment): ${sentiment_price:.2f}")
+        if sentiment_price != predicted_price:
+            print(f"Base Predicted Price: ${predicted_price:.2f}")
+            print(f"Final Predicted Price: ${sentiment_price:.2f}")
+        else:
+            print(f"Predicted Price: ${predicted_price:.2f}")
         trade_result = trader.execute_trade(current_price, predicted_price, sentiment_price)
         print(trade_result)
         

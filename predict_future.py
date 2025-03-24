@@ -38,13 +38,21 @@ def make_future_prediction(model, last_sequence, device):
         return prediction.cpu().numpy()[0][0]
 
 def get_valued_sentiment():
-    articles = sentiment_analysis.get_tesla_articles(days_back=7)
-    df = sentiment_analysis.process_articles(articles)
-    metrics = sentiment_analysis.calculate_metrics(df)
-    print(metrics)
-    sentiment_score = metrics['avg_weighted_sentiment']
-    valued_sentiment = sentiment_score * 50
-    return valued_sentiment
+    """Get sentiment value, return 0 if NewsAPI key is not available"""
+    try:
+        articles = sentiment_analysis.get_tesla_articles(days_back=7)
+        if not articles:  # If no articles found (likely due to missing API key)
+            print("NewsAPI key not found or invalid. Running without sentiment analysis.")
+            return 0
+        df = sentiment_analysis.process_articles(articles)
+        metrics = sentiment_analysis.calculate_metrics(df)
+        print(metrics)
+        sentiment_score = metrics['avg_weighted_sentiment']
+        valued_sentiment = sentiment_score * 100
+        return valued_sentiment
+    except Exception as e:
+        print("Error in sentiment analysis. Running without sentiment adjustment.")
+        return 0
 
 def buy_sell_decision(predicted_price, current_price, threshold = 5):
     if predicted_price > current_price + threshold :
@@ -110,10 +118,16 @@ def main():
         dates.append(next_date)
         
         print(f"\nDate: {next_date.strftime('%Y-%m-%d')}")
-        print(f"Current Price: ${get_current_price(df)}")
-        print(f"Predicted Price Before Sentiment: ${denormalized_pred:.2f}")
-        print(f"Predicted Price After Sentiment: ${sentiment_weighted_price:.2f}")
-        print(f"Buy/Sell Decision: {buy_sell_decision(sentiment_weighted_price, get_current_price(df))}")
+        print(f"Current Price: ${get_current_price(df):.2f}")
+        print(f"Predicted Price: ${denormalized_pred:.2f}")
+        if valued_sentiment != 0:
+            print(f"Sentiment Adjustment: ${valued_sentiment:.2f}")
+            print(f"Final Predicted Price: ${sentiment_weighted_price:.2f}")
+        
+        if valued_sentiment != 0:
+            print(f"Buy/Sell Decision: {buy_sell_decision(sentiment_weighted_price, get_current_price(df))}")
+        else:
+            print(f"Buy/Sell Decision: {buy_sell_decision(denormalized_pred, get_current_price(df))}")
 
         # Update last_sequence for next prediction
         # We'll use the predicted value as the next day's close price
