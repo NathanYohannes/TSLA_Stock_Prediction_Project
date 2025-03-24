@@ -85,18 +85,21 @@ def load_and_preprocess_data(file_path):
     
     return normalized_data, min_vals, max_vals, df
 
-def plot_predictions(y_true, y_pred, dates):
+def plot_predictions(y_true, y_pred, dates, save_path):
     """Plot actual vs predicted values"""
     plt.figure(figsize=(12, 6))
     plt.plot(dates, y_true, label='Actual')
-    plt.plot(dates, y_pred, label='Predicted')
+    plt.plot(dates, y_pred, 'r--', label='Predicted')
     plt.title('TSLA Stock Price Prediction')
     plt.xlabel('Date')
     plt.ylabel('Price')
     plt.legend()
     plt.xticks(rotation=45)
     plt.tight_layout()
-    plt.savefig('lstm_predictions_pytorch.png')
+    
+    # Create LSTM directory if it doesn't exist
+    os.makedirs('graphs/LSTM', exist_ok=True)
+    plt.savefig(save_path)
     plt.close()
 
 def get_next_model_number(model_name):
@@ -253,7 +256,7 @@ def main():
     test_dates = df['Date'].iloc[-len(actual_values):]
     
     # Plot results
-    plot_predictions(actual_values, predictions, test_dates)
+    plot_predictions(actual_values, predictions, test_dates, 'graphs/LSTM/lstm_predictions_pytorch.png')
     
     # Calculate and print metrics
     mse = np.mean((actual_values - predictions) ** 2)

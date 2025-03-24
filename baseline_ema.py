@@ -3,13 +3,14 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import argparse
+import os
 
 # Set style for better visualizations
 plt.style.use('seaborn')
 sns.set_palette("husl")
 
 # Constants
-OUTPUT_PLOT_FILE = 'ema_baseline_results.png'
+OUTPUT_PLOT_FILE = 'graphs/EMA/ema_baseline_results.png'
 
 def load_data(file_path):
     """Load and preprocess the TSLA stock data."""
@@ -109,14 +110,21 @@ def evaluate_model(df, spans):
         print(f"Mean Absolute Error: {mae:.2f}")
 
 def plot_results(df, spans):
-    """Plot actual vs predicted prices for both EMAs."""
-    plt.figure(figsize=(15, 7))
-    plt.plot(df.index, df['Close'], label='Actual Price', alpha=0.7, color='black')
+    """Plot actual vs predicted prices"""
+    plt.figure(figsize=(12, 6))
     
-    colors = ['#FF6B6B', '#4ECDC4']  # Different colors for different EMAs
-    for span, color in zip(spans, colors):
-        plt.plot(df.index, df[f'Prediction_{span}'], 
-                label=f'{span}-day EMA Prediction', 
+    # Plot actual prices
+    plt.plot(df['Date'], df['Close'], 
+            label='Actual', 
+            color='black', 
+            alpha=0.7)
+    
+    # Plot predictions for each period
+    colors = ['blue', 'red', 'green', 'purple', 'orange']
+    for i, span in enumerate(spans):
+        color = colors[i % len(colors)]
+        plt.plot(df['Date'], df[f'EMA_{span}'], 
+                label=f'{span}-day EMA', 
                 alpha=0.7, 
                 color=color)
     
@@ -126,6 +134,9 @@ def plot_results(df, spans):
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
+    
+    # Create EMA directory if it doesn't exist
+    os.makedirs('graphs/EMA', exist_ok=True)
     plt.savefig(OUTPUT_PLOT_FILE)
     plt.close()
 
